@@ -31,3 +31,17 @@ func TestDoctorFailsWithoutDCGM(t *testing.T) {
 		t.Errorf("exit %d:\n%s", code, out)
 	}
 }
+
+func TestExplain(t *testing.T) {
+	code, out, _ := run("explain")
+	if code != 0 || !strings.Contains(out, "GPU005  excess-replicas") || !strings.Contains(out, "GPU007  oversized-gpu    Work much smaller than the GPU (advice") {
+		t.Errorf("explain list: %d\n%s", code, out)
+	}
+	code, out, _ = run("explain", "idle-gpu")
+	if code != 0 || !strings.HasPrefix(out, "GPU001 idle-gpu: GPUs held but never used") || !strings.Contains(out, "ttlSecondsAfterFinished") {
+		t.Errorf("explain idle-gpu: %d\n%s", code, out)
+	}
+	if code, _, _ := run("explain", "GPU999"); code != exitUsage {
+		t.Errorf("unknown rule: exit %d", code)
+	}
+}
