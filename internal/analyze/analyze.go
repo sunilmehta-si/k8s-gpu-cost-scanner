@@ -187,8 +187,12 @@ func Run(f *fleet.Fleet, s *snapshot.Snapshot, prices *price.Book, opts Options)
 	return r
 }
 
-// rules run in this order; see the package comment.
-var rules = []func(*analysis){}
+// rules run in this order, most specific cause first; see the package comment.
+var rules = []func(*analysis){
+	(*analysis).asleep,
+	(*analysis).noTraffic,
+	(*analysis).idle,
+}
 
 // pods returns the pods in scope, in a stable order.
 func (a *analysis) pods() []*fleet.Pod {

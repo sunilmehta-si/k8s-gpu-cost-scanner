@@ -2,8 +2,6 @@ package analyze
 
 import "fmt"
 
-func init() { rules = append(rules, (*analysis).idle) }
-
 // idle flags pods whose GPUs did nothing: the 95th percentile of their activity stayed under IdleActivity for the
 // time they held them. A serving pod that answered requests is left to the serving rules, which name the cause.
 func (a *analysis) idle() {
