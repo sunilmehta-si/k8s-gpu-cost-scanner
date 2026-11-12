@@ -51,6 +51,8 @@ type Pod struct {
 	LastSeen     time.Time `json:"last_seen"`
 	// Usage is how busy the pod's GPUs were, from the DCGM exporter.
 	Usage Usage `json:"usage"`
+	// Engine is what the pod's vLLM or SGLang server reported; nil for pods that serve neither.
+	Engine *Engine `json:"engine,omitempty"`
 	// held marks the steps (by Unix milliseconds) the pod held GPUs, to line other series up against.
 	held map[int64]float64
 }
@@ -171,6 +173,7 @@ func Build(s *snapshot.Snapshot) *Fleet {
 
 	f.resolveWorkloads(s)
 	f.attachDCGM(s)
+	f.attachEngines(s)
 	return f
 }
 
