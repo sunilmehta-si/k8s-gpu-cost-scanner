@@ -78,6 +78,10 @@ type Node struct {
 	Offered map[string]float64 `json:"offered"`
 	// OfferedHours is, per resource, the GPU-hours or slice-hours the node made allocatable.
 	OfferedHours map[string]float64 `json:"offered_hours"`
+	// Product is the node's GPU model; gpu.Unknown when no source named it.
+	Product gpu.Product `json:"product"`
+	// InstanceType is the cloud instance type, when a node label or OpenCost named it.
+	InstanceType string `json:"instance_type,omitempty"`
 }
 
 // Fleet is everything the snapshot says about the cluster's GPUs.
@@ -174,6 +178,7 @@ func Build(s *snapshot.Snapshot) *Fleet {
 	f.resolveWorkloads(s)
 	f.attachDCGM(s)
 	f.attachEngines(s)
+	f.describeNodes(s)
 	return f
 }
 
