@@ -60,6 +60,15 @@ func Markdown(w io.Writer, r *analyze.Report) error {
 		b.printf("\n")
 	}
 
+	if len(r.Namespaces) > 1 {
+		b.printf("### Namespaces\n\n| Namespace | Pods | GPU-hours | Cost | Activity | Waste |\n|---|---|---|---|---|---|\n")
+		for _, ns := range r.Namespaces {
+			b.printf("| %s | %d | %s | %s | %s | %s GPU-h |\n", cell(ns.Namespace), ns.Pods, hours(ns.GPUHours),
+				costCell(ns.Cost, ns.Priced, r.Currency), activityCell(ns.Activity, ns.Measured), hours(ns.WasteGPUHours))
+		}
+		b.printf("\n")
+	}
+
 	if len(r.BlindSpots) > 0 {
 		b.printf("### Blind spots\n\n")
 		for _, bs := range r.BlindSpots {

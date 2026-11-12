@@ -208,6 +208,63 @@
       "waste_gpu_hours": 0
     }
   ],
+  "namespaces": [
+    {
+      "namespace": "ml",
+      "pods": 5,
+      "gpu_hours": 337.16666666666566,
+      "cost": 1189.716666666663,
+      "priced": true,
+      "activity": 0.4121091942659416,
+      "measured": true,
+      "waste_gpu_hours": 120.4166666666663,
+      "waste_cost": 402.19166666666547
+    },
+    {
+      "namespace": "research",
+      "pods": 1,
+      "gpu_hours": 24.08333333333326,
+      "cost": 96.33333333333304,
+      "priced": true,
+      "activity": 0,
+      "measured": true,
+      "waste_gpu_hours": 24.08333333333326,
+      "waste_cost": 96.33333333333304
+    },
+    {
+      "namespace": "rl",
+      "pods": 1,
+      "gpu_hours": 24.08333333333326,
+      "cost": 16.85833333333328,
+      "priced": true,
+      "activity": 0.15051903114186851,
+      "measured": true,
+      "waste_gpu_hours": 16.833333333333282,
+      "waste_cost": 11.783333333333298
+    },
+    {
+      "namespace": "search",
+      "pods": 1,
+      "gpu_hours": 24.08333333333326,
+      "cost": 16.85833333333328,
+      "priced": true,
+      "activity": 0.11979757785467128,
+      "measured": true,
+      "waste_gpu_hours": 0,
+      "waste_cost": 0
+    },
+    {
+      "namespace": "training",
+      "pods": 1,
+      "gpu_hours": 12.166666666666657,
+      "cost": 48.66666666666663,
+      "priced": true,
+      "activity": 0.9189835616438355,
+      "measured": true,
+      "waste_gpu_hours": 0,
+      "waste_cost": 0
+    }
+  ],
   "findings": [
     {
       "rule": "GPU005",

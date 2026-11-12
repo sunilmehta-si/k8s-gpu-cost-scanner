@@ -101,4 +101,14 @@
 | `rl/policy-8b` | rl/Deployment/policy-server | 1.0 (max 1) | 24.1 | $16.86 | 15.1% | 30.1% | 1.9M | $8.67 |
 | `Qwen/Qwen2.5-7B-Instruct` | ml/Deployment/qwen-7b | 1.0 (max 1) | 24.1 | $16.86 | 7.7% | 12.8% | 236.4K | $71.30 |
 
+### Namespaces
+
+| Namespace | Pods | GPU-hours | Cost | Activity | Waste |
+|---|---|---|---|---|---|
+| ml | 5 | 337.2 | $1,189.72 | 41.2% | 120.4 GPU-h |
+| research | 1 | 24.1 | $96.33 | 0.0% | 24.1 GPU-h |
+| rl | 1 | 24.1 | $16.86 | 15.1% | 16.8 GPU-h |
+| search | 1 | 24.1 | $16.86 | 12.0% | 0.0 GPU-h |
+| training | 1 | 12.2 | $48.67 | 91.9% | 0.0 GPU-h |
+
 <sub>gpucost VERSION · thresholds: idle under 5.0% activity at the 95th percentile, replicas sized to 80.0% KV cache use</sub>

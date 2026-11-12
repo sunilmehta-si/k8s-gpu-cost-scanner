@@ -107,6 +107,21 @@ func Text(w io.Writer, r *analyze.Report, o TextOptions) error {
 		tw.Flush()
 	}
 
+	if len(r.Namespaces) > 1 {
+		b.printf("\nNamespaces\n")
+		tw := tabwriter.NewWriter(b, 0, 0, 2, ' ', 0)
+		fmt.Fprintf(tw, "  NAMESPACE\tPODS\tGPU-HOURS\tCOST\tACTIVITY\tWASTE\n")
+		for _, ns := range r.Namespaces {
+			waste := hours(ns.WasteGPUHours) + " GPU-h"
+			if ns.Priced && ns.WasteGPUHours > 0 {
+				waste = money(ns.WasteCost, r.Currency) + " (" + waste + ")"
+			}
+			fmt.Fprintf(tw, "  %s\t%d\t%s\t%s\t%s\t%s\n", ns.Namespace, ns.Pods, hours(ns.GPUHours),
+				costCell(ns.Cost, ns.Priced, r.Currency), activityCell(ns.Activity, ns.Measured), waste)
+		}
+		tw.Flush()
+	}
+
 	if len(r.Workloads) > 0 {
 		b.printf("\nWorkloads by GPU-hours\n")
 		tw := tabwriter.NewWriter(b, 0, 0, 2, ' ', 0)

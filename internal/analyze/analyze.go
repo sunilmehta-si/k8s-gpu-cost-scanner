@@ -102,6 +102,7 @@ type Report struct {
 	Summary    Summary           `json:"summary"`
 	Models     []ModelCost       `json:"models"`
 	Workloads  []WorkloadCost    `json:"workloads"`
+	Namespaces []NamespaceCost   `json:"namespaces"`
 	Findings   []Finding         `json:"findings"`
 	BlindSpots []BlindSpot       `json:"blind_spots"`
 	Queries    map[string]string `json:"queries,omitempty"`
@@ -188,6 +189,7 @@ func Run(f *fleet.Fleet, s *snapshot.Snapshot, prices *price.Book, opts Options)
 	}
 	r.Summary = a.summary()
 	r.Models, r.Workloads = a.costs()
+	r.Namespaces = a.namespaces()
 	r.BlindSpots = a.blindSpots()
 	return r
 }
