@@ -86,6 +86,7 @@ type Client struct {
 	base    *url.URL
 	http    *http.Client
 	headers http.Header
+	token   func() (string, error)
 	retries int
 	backoff time.Duration
 }
@@ -303,6 +304,13 @@ func (c *Client) once(ctx context.Context, path string, form url.Values) (*apiDa
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
+	if c.token != nil {
+		tok, err := c.token()
+		if err != nil {
+			return nil, nil, fmt.Errorf("prometheus: %w", err)
+		}
+		req.Header.Set("Authorization", "Bearer "+tok)
+	}
 	for name, values := range c.headers {
 		for _, v := range values {
 			req.Header.Add(name, v)
