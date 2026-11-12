@@ -1,0 +1,14 @@
+# Build output
+/bin/
+/dist/
+/gpucost
+
+# Test and e2e scratch
+/.e2e/
+*.out
+coverage.*
+
+# Snapshots can hold pod and namespace names; keep them out of git unless meant as fixtures
+*.snapshot.json
+*.snapshot.json.gz
+!testdata/**
