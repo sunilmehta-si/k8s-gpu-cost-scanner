@@ -37,6 +37,7 @@ Usage:
   gpucost scan    --prometheus URL [flags]   analyse a window and report waste and cost
   gpucost scan    --snapshot FILE  [flags]   analyse a recorded window again, offline
   gpucost record  --prometheus URL -o FILE   save a window's raw metrics for later
+  gpucost doctor  --prometheus URL           check the cluster exports what gpucost needs
   gpucost version                            print the version
 
 Run "gpucost COMMAND -h" for a command's flags.
@@ -55,6 +56,8 @@ func Main(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		err = runScan(ctx, rest, stdout, stderr)
 	case "record":
 		err = runRecord(ctx, rest, stdout, stderr)
+	case "doctor":
+		err = runDoctor(ctx, rest, stdout, stderr)
 	case "version", "--version", "-version":
 		fmt.Fprintln(stdout, toolName())
 		return exitOK

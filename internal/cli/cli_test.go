@@ -36,6 +36,8 @@ func fixture(t *testing.T) string {
 	s.Range["pod_gpu_requests"] = []prom.Series{{Labels: prom.Labels{"namespace": "lab", "pod": "nb-0", "node": "g1", "resource": "nvidia_com_gpu"}, Points: pts}}
 	s.Range["node_gpu_allocatable"] = []prom.Series{{Labels: prom.Labels{"node": "g1", "resource": "nvidia_com_gpu"}, Points: two}}
 	s.Range["gpu_activity"] = []prom.Series{{Labels: prom.Labels{"exported_namespace": "lab", "exported_pod": "nb-0", "UUID": "GPU-1", "modelName": "NVIDIA L4"}, Points: zero}}
+	s.Present = []string{"DCGM_FI_PROF_GR_ENGINE_ACTIVE", "kube_node_status_allocatable", "kube_pod_container_resource_requests", "kube_pod_status_phase"}
+	s.Queries["gpu_activity"] = "DCGM_FI_PROF_GR_ENGINE_ACTIVE"
 	path := filepath.Join(t.TempDir(), "s.json.gz")
 	if err := snapshot.Write(path, s); err != nil {
 		t.Fatal(err)
