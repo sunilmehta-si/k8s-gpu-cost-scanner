@@ -29,7 +29,11 @@ func TestIdleGPU(t *testing.T) {
 		return 0
 	})
 
-	r := w.runWith(func(t *Thresholds) { t.MinHours = 2 })
+	r := w.runWith(func(t *Thresholds) {
+		t.MinHours = 2
+		// Leave the node's unrequested GPUs out of this test's totals.
+		t.MinStrandedHours = 1e9
+	})
 	got := findings(r, "GPU001")
 	if len(got) != 1 {
 		t.Fatalf("idle findings = %+v", got)

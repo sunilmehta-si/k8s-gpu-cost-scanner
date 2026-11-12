@@ -192,6 +192,8 @@ var rules = []func(*analysis){
 	(*analysis).asleep,
 	(*analysis).noTraffic,
 	(*analysis).idle,
+	(*analysis).overprovisioned,
+	(*analysis).stranded,
 }
 
 // pods returns the pods in scope, in a stable order.
@@ -252,6 +254,34 @@ func (a *analysis) claimPod(p *fleet.Pod, fd Finding, hours float64) {
 	fd.WasteCost, fd.Priced = a.cost(p.Node, hours)
 	if fd.Severity == "" {
 		fd.Severity = a.severity(hours)
+	}
+	a.findings = append(a.findings, fd)
+}
+
+// claimWorkload records a finding about a workload that wastes the given GPU-hours, spread over its pods' hours
+// no earlier rule claimed.
+func (a *analysis) claimWorkload(w string, ns string, pods []*fleet.Pod, fd Finding, hours float64) {
+	fd.Target, fd.Namespace = w, ns
+	fd.Priced = true
+	left := hours
+	for _, p := range pods {
+		fd.Pods = append(fd.Pods, p.Key.Name)
+		take := a.unclaimed(p)
+		if take > left {
+			take = left
+		}
+		if take <= 0 {
+			continue
+		}
+		left -= take
+		a.claimed[p.Key] += take
+		fd.WasteGPUHours += take
+		c, ok := a.cost(p.Node, take)
+		fd.WasteCost += c
+		fd.Priced = fd.Priced && ok
+	}
+	if fd.Severity == "" {
+		fd.Severity = a.severity(fd.WasteGPUHours)
 	}
 	a.findings = append(a.findings, fd)
 }

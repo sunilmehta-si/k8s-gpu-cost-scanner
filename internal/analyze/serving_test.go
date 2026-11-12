@@ -9,7 +9,8 @@ import (
 
 func TestNoTraffic(t *testing.T) {
 	w := newWorld(t)
-	w.node("n1", "", 8)
+	// Exactly the two GPUs the pods request, so no node-level waste adds to the total.
+	w.node("n1", "", 2)
 	w.pod("ml", "forgotten-0", "n1", "forgotten", 1, always)
 	w.activity("ml", "forgotten-0", "GPU-1", constant(0.0))
 	w.vllm("ml", "forgotten-0", "old-model", constant(0), nil, 0, 0)
