@@ -1,0 +1,16 @@
+# GPU prices for gpucost scan --prices examples/prices.csv
+#
+# The numbers below show the format only: they are illustrative, not quotes. Replace every one with what you
+# actually pay per GPU-hour (on-demand, committed-use or contract), in the currency you pass with --currency.
+#
+# gpu: a GPU model in any spelling ("NVIDIA H100 80GB HBM3", "h100-80gb", "nvidia-l4"), a family without memory
+#      size ("a100" covers a100-40gb and a100-80gb), "instance:" and an instance type, or "*" for everything else.
+# price_per_gpu_hour: the price of one GPU for one hour. For an instance, divide the instance's price by its GPUs.
+gpu,price_per_gpu_hour,note
+h100-80gb,4.00,illustrative: your H100 rate
+a100-80gb,2.50,illustrative: your A100 80GB rate
+a100-40gb,2.00,illustrative: your A100 40GB rate
+l4,0.70,illustrative: your L4 rate
+t4,0.35,illustrative: your T4 rate
+instance:g2-standard-24,0.80,illustrative: a 2 x L4 instance at 1.60 per hour is 0.80 per GPU
+*,1.00,illustrative: anything not listed above
