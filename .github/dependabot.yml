@@ -1,0 +1,27 @@
+# Pinned action commits, the base image and Go itself stay safe only while they are kept current: Dependabot opens
+# weekly update pull requests. Each update waits 14 days after a release, so a compromised or withdrawn release is
+# usually found before it is proposed. Security updates are not delayed. gpucost has no Go module dependencies, so
+# gomod tracks only the Go version.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
