@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# `shell: bash` runs steps with -eo pipefail.
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          check-latest: false
+      - name: gofmt, vet and tests with the race detector
+        run: make test
+      - name: Every platform builds
+        run: make dist VERSION=ci
+      - name: Known vulnerabilities (govulncheck)
+        run: make vuln
+
+  e2e:
+    # The synthetic fleet backfilled into a real Prometheus, scanned, and checked against the committed report.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          check-latest: false
+      - name: End-to-end against Prometheus
+        run: make e2e
+      - name: Report for this run
+        if: always()
+        run: |
+          if [ -f .e2e/demo.snapshot.json.gz ]; then
+            go run ./cmd/gpucost scan --snapshot .e2e/demo.snapshot.json.gz --prices testdata/demo.prices.csv \
+              -o markdown >> "$GITHUB_STEP_SUMMARY"
+          fi
