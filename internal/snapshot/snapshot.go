@@ -78,8 +78,22 @@ type Snapshot struct {
 	Range map[string][]prom.Series `json:"range"`
 	// Instant holds instant query results, by signal name.
 	Instant map[string][]prom.Sample `json:"instant"`
+	// Present lists the metric names the server had over the window.
+	Present []string `json:"metrics_present,omitempty"`
+	// Queries holds the PromQL each signal was collected with, so a reader can rerun or audit it.
+	Queries map[string]string `json:"queries,omitempty"`
 	// Notes record what went wrong or was missing while collecting, for example a metric no target exports.
 	Notes []string `json:"notes,omitempty"`
+}
+
+// Has reports whether the server had the metric over the window.
+func (s *Snapshot) Has(metric string) bool {
+	for _, m := range s.Present {
+		if m == metric {
+			return true
+		}
+	}
+	return false
 }
 
 // New returns an empty snapshot of the window.
@@ -91,6 +105,7 @@ func New(tool, source string, w Window) *Snapshot {
 		Window:  w,
 		Range:   map[string][]prom.Series{},
 		Instant: map[string][]prom.Sample{},
+		Queries: map[string]string{},
 	}
 }
 
