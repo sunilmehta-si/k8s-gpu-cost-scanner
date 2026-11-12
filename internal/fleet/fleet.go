@@ -49,6 +49,8 @@ type Pod struct {
 	RunningHours float64   `json:"running_hours"`
 	FirstSeen    time.Time `json:"first_seen"`
 	LastSeen     time.Time `json:"last_seen"`
+	// Usage is how busy the pod's GPUs were, from the DCGM exporter.
+	Usage Usage `json:"usage"`
 	// held marks the steps (by Unix milliseconds) the pod held GPUs, to line other series up against.
 	held map[int64]float64
 }
@@ -81,6 +83,8 @@ type Fleet struct {
 	Window snapshot.Window
 	Pods   map[PodKey]*Pod
 	Nodes  map[string]*Node
+	// GPUs are the GPUs and MIG instances the DCGM exporter reported.
+	GPUs []*GPU
 	// Notes say what the fleet could not be built from, for the report's blind spots.
 	Notes []string
 }
@@ -166,6 +170,7 @@ func Build(s *snapshot.Snapshot) *Fleet {
 	}
 
 	f.resolveWorkloads(s)
+	f.attachDCGM(s)
 	return f
 }
 
