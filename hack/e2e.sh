@@ -67,11 +67,13 @@ echo "e2e: recording the window with gpucost"
 go run ./cmd/gpucost record --prometheus "http://127.0.0.1:$PORT" --end "$END" --window 24h --step 5m \
   -o "$work/demo.snapshot.json.gz" --verbose
 
+if [[ "${1:-}" == "--update" ]]; then
+  # An intended change to the queries or the scenario: commit this recording and the reports it gives.
+  cp "$work/demo.snapshot.json.gz" testdata/demo.snapshot.json.gz
+  go test -count=1 -run TestDemoGolden ./internal/cli -update-golden > /dev/null
+  echo "e2e: updated testdata/demo.snapshot.json.gz and testdata/golden; review the diff"
+fi
+
 echo "e2e: comparing the report with the committed one"
 GPUCOST_E2E_SNAPSHOT="$work/demo.snapshot.json.gz" go test -count=1 -run 'TestDemo' ./internal/analyze ./internal/cli
-
-if [[ "${1:-}" == "--update" ]]; then
-  cp "$work/demo.snapshot.json.gz" testdata/demo.snapshot.json.gz
-  echo "e2e: updated testdata/demo.snapshot.json.gz"
-fi
 echo "e2e: passed"
