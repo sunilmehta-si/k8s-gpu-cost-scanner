@@ -8,6 +8,7 @@ package gpu
 import (
 	"regexp"
 	"strings"
+	"unicode"
 )
 
 // Product is a GPU model's normalized key, such as "h100-80gb" or "l4".
@@ -19,7 +20,6 @@ const Unknown Product = "unknown"
 var (
 	familyRE = regexp.MustCompile(`^(a|b|h|l|t|v|p|k|gb|gh)\d+[a-z]*$`)
 	memoryRE = regexp.MustCompile(`^(\d+)gb$`)
-	splitRE  = regexp.MustCompile(`[\s_\-/]+`)
 	noise    = map[string]bool{
 		"nvidia": true, "tesla": true, "geforce": true, "sxm": true, "sxm2": true, "sxm3": true, "sxm4": true,
 		"sxm5": true, "pcie": true, "hbm2": true, "hbm2e": true, "hbm3": true, "hbm3e": true, "server": true,
@@ -33,16 +33,21 @@ var (
 // see ParseMIG for the slice.
 func Normalize(name string) Product {
 	s := strings.ToLower(strings.TrimSpace(name))
-	if i := strings.Index(s, "-mig-"); i >= 0 {
-		s = s[:i]
-	}
 	if s == "" {
 		return Unknown
 	}
 	var family []string
 	var mem string
 	nvl := false
-	tokens := splitRE.Split(s, -1)
+	// Split on any Unicode space as well as - _ /: a regexp's \s misses some, such as the vertical tab.
+	tokens := strings.FieldsFunc(s, func(r rune) bool { return unicode.IsSpace(r) || r == '-' || r == '_' || r == '/' })
+	// A MIG suffix ("...-MIG-1g.5gb") names a slice, not the product: drop it and what follows.
+	for i, tok := range tokens {
+		if tok == "mig" {
+			tokens = tokens[:i]
+			break
+		}
+	}
 	for i := 0; i < len(tokens); i++ {
 		tok := tokens[i]
 		switch {
