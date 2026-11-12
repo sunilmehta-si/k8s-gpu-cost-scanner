@@ -209,6 +209,11 @@ func runScan(ctx context.Context, args []string, stdout, stderr io.Writer) error
 	fs.Var(&priceFlags, "price", "a GPU price `key=price`, repeatable, for example h100-80gb=4.10 or *=2.5")
 	fs.Var(&namespaces, "namespace", "only report pods in this namespace, repeatable")
 	currency := fs.String("currency", "USD", "currency the prices are in, for display")
+	var g gate
+	fs.Float64Var(&g.overCost, "fail-over-cost", 0, "exit 3 when recoverable waste costs more than this")
+	fs.Float64Var(&g.overGPUHours, "fail-over-gpu-hours", 0, "exit 3 when recoverable waste is more GPU-hours than this")
+	fs.StringVar(&g.onSeverity, "fail-on", "", "exit 3 when any finding is this severe or worse: high, medium or low")
+	stepSummary := fs.String("step-summary", "", "also append the Markdown report to `FILE`, such as $GITHUB_STEP_SUMMARY")
 	th := analyze.Defaults()
 	fs.Float64Var(&th.IdleActivity, "idle-activity", th.IdleActivity, "a GPU is idle when its 95th-percentile activity is below this share")
 	fs.Float64Var(&th.MinHours, "min-hours", th.MinHours, "judge only pods that held GPUs at least this many hours")
@@ -228,6 +233,9 @@ func runScan(ctx context.Context, args []string, stdout, stderr io.Writer) error
 		return err
 	}
 	if err := checkThresholds(th); err != nil {
+		return err
+	}
+	if err := g.validate(); err != nil {
 		return err
 	}
 	table := price.NewTable()
@@ -271,7 +279,18 @@ func runScan(ctx context.Context, args []string, stdout, stderr io.Writer) error
 		}
 	}
 	rep := analyze.Run(f, snap, price.Resolve(table, f, snap), opts)
-	return writeTo(*outFile, stdout, func(w io.Writer) error { return render(w, rep) })
+	if err := writeTo(*outFile, stdout, func(w io.Writer) error { return render(w, rep) }); err != nil {
+		return err
+	}
+	if *stepSummary != "" {
+		if err := appendSummary(*stepSummary, rep); err != nil {
+			return fmt.Errorf("step summary: %w", err)
+		}
+	}
+	if g.set() {
+		return g.check(rep)
+	}
+	return nil
 }
 
 func runRecord(ctx context.Context, args []string, stdout, stderr io.Writer) error {
