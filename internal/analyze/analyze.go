@@ -83,8 +83,11 @@ type Finding struct {
 	// advice, such as a GPU that may be bigger than needed.
 	WasteGPUHours float64 `json:"waste_gpu_hours"`
 	// WasteCost is WasteGPUHours priced; Priced is false when part of it had no price.
-	WasteCost      float64 `json:"waste_cost"`
-	Priced         bool    `json:"priced"`
+	WasteCost float64 `json:"waste_cost"`
+	Priced    bool    `json:"priced"`
+	// IdleGPUHours, on advice findings, are GPU-hours spent idle that only scaling to zero or sharing the GPU
+	// would recover. They are not part of WasteGPUHours.
+	IdleGPUHours   float64 `json:"idle_gpu_hours,omitempty"`
 	Recommendation string  `json:"recommendation"`
 }
 
@@ -124,6 +127,8 @@ type Summary struct {
 	// WasteGPUHours and WasteCost add up every finding's recoverable waste.
 	WasteGPUHours float64 `json:"waste_gpu_hours"`
 	WasteCost     float64 `json:"waste_cost"`
+	// IdleGPUHours add up advice findings' idle GPU-hours, kept apart from waste.
+	IdleGPUHours float64 `json:"idle_gpu_hours"`
 	// Findings counts findings by severity.
 	Findings map[Severity]int `json:"findings"`
 }
@@ -194,6 +199,8 @@ var rules = []func(*analysis){
 	(*analysis).idle,
 	(*analysis).overprovisioned,
 	(*analysis).stranded,
+	(*analysis).lowDuty,
+	(*analysis).oversized,
 }
 
 // pods returns the pods in scope, in a stable order.

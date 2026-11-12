@@ -35,6 +35,7 @@ func (a *analysis) summary() Summary {
 	for _, fd := range a.findings {
 		s.WasteGPUHours += fd.WasteGPUHours
 		s.WasteCost += fd.WasteCost
+		s.IdleGPUHours += fd.IdleGPUHours
 		s.Findings[fd.Severity]++
 	}
 	return s
