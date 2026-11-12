@@ -93,3 +93,14 @@ func TestResolveOrder(t *testing.T) {
 		t.Error("a node was priced from nothing")
 	}
 }
+
+// TestExamplePricesLoad keeps examples/prices.csv valid.
+func TestExamplePricesLoad(t *testing.T) {
+	tb := NewTable()
+	if err := tb.LoadCSV(filepath.Join("..", "..", "examples", "prices.csv")); err != nil {
+		t.Fatal(err)
+	}
+	if tb.Len() < 5 {
+		t.Errorf("only %d prices", tb.Len())
+	}
+}

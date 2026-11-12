@@ -1,0 +1,35 @@
+# A weekly GPU cost report as a scheduled GitHub Actions job: the report lands in the run's summary, and the job
+# fails when recoverable waste passes a budget, so the people watching the repository hear about it.
+#
+# Copy to .github/workflows/gpu-cost.yml. The runner must reach your Prometheus: use a self-hosted runner inside the
+# cluster's network, or a Prometheus-compatible endpoint reachable with a token (Grafana Cloud, Mimir, Thanos behind
+# an authenticating proxy). Store the URL and token as repository secrets.
+name: gpu-cost
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"   # Mondays 07:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "1.27.4"
+      - name: Install gpucost
+        run: go install github.com/sunilmehta-si/k8s-gpu-cost-scanner/cmd/gpucost@v0.1.0
+      - name: Scan the last 7 days
+        env:
+          GPUCOST_PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL }}
+          GPUCOST_PROMETHEUS_TOKEN: ${{ secrets.PROMETHEUS_TOKEN }}
+        run: |
+          gpucost scan --window 168h --step 15m \
+            --price h100-80gb=4.00 --price l4=0.70 \
+            --step-summary "$GITHUB_STEP_SUMMARY" \
+            --fail-over-cost 1000
