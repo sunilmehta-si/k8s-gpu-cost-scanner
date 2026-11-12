@@ -117,3 +117,34 @@ func TestMissingSnapshotIsAnError(t *testing.T) {
 		t.Errorf("exit %d, stderr %q", code, errOut)
 	}
 }
+
+func TestRedactedSnapshotAnalysesTheSame(t *testing.T) {
+	s, err := snapshot.Read(filepath.Join("..", "..", "testdata", "demo.snapshot.json.gz"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	snapshot.Redact(s)
+	path := filepath.Join(t.TempDir(), "redacted.json.gz")
+	snapshot.Write(path, s)
+	prices := filepath.Join("..", "..", "testdata", "demo.prices.csv")
+	_, plain, _ := run("scan", "--snapshot", filepath.Join("..", "..", "testdata", "demo.snapshot.json.gz"), "--prices", prices, "-o", "json")
+	_, redacted, _ := run("scan", "--snapshot", path, "--prices", prices, "-o", "json")
+	pick := func(out string) (float64, int) {
+		var r struct {
+			Summary struct {
+				WasteGPUHours float64 `json:"waste_gpu_hours"`
+			} `json:"summary"`
+			Findings []any `json:"findings"`
+		}
+		json.Unmarshal([]byte(out), &r)
+		return r.Summary.WasteGPUHours, len(r.Findings)
+	}
+	h1, n1 := pick(plain)
+	h2, n2 := pick(redacted)
+	if h1 == 0 || h1 != h2 || n1 != n2 {
+		t.Errorf("plain %.2f GPU-hours in %d findings, redacted %.2f in %d", h1, n1, h2, n2)
+	}
+	if strings.Contains(redacted, "legacy-mistral") || strings.Contains(redacted, "notebook-ana") {
+		t.Error("names leaked through redaction")
+	}
+}

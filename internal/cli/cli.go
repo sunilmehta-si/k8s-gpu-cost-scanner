@@ -300,6 +300,7 @@ func runRecord(ctx context.Context, args []string, stdout, stderr io.Writer) err
 	conn.register(fs)
 	out := fs.String("o", "", "write the snapshot to `FILE` (.gz to compress); required")
 	verbose := fs.Bool("verbose", false, "show collection progress")
+	redact := fs.Bool("redact", false, "replace namespace, pod, node, model and GPU names with pseudonyms, to share the snapshot")
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return err
@@ -312,6 +313,9 @@ func runRecord(ctx context.Context, args []string, stdout, stderr io.Writer) err
 	snap, err := conn.collectSnapshot(ctx, stderr, *verbose)
 	if err != nil {
 		return err
+	}
+	if *redact {
+		snapshot.Redact(snap)
 	}
 	if err := snapshot.Write(*out, snap); err != nil {
 		return err
