@@ -1,0 +1,81 @@
+name: release
+
+# Runs when a version tag is pushed: builds the binaries and the image from the tagged commit, attests their
+# provenance, and publishes them on the tag's release page.
+on:
+  push:
+    tags: ["v*"]
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write      # create the release
+      packages: write      # push the image to ghcr.io
+      id-token: write      # sign the provenance attestations
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          check-latest: false
+      - name: Test
+        run: make test
+      - name: Build every platform
+        run: make dist VERSION="$GITHUB_REF_NAME"
+      - name: Attest the binaries' provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/gpucost-*.tar.gz
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push the image
+        id: image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          provenance: false
+          sbom: false
+      - name: Attest the image's provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ghcr.io/${{ github.repository }}
+          subject-digest: ${{ steps.image.outputs.digest }}
+          push-to-registry: true
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          notes=$(mktemp)
+          {
+            echo "Image: \`ghcr.io/${GITHUB_REPOSITORY}@${DIGEST}\`"
+            echo
+            echo "Verify a download: \`gh attestation verify gpucost-${GITHUB_REF_NAME}-linux-amd64.tar.gz --repo ${GITHUB_REPOSITORY}\`"
+            echo
+            echo "See the [CHANGELOG](CHANGELOG.md) for what changed."
+          } > "$notes"
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/gpucost-*.tar.gz dist/checksums.txt --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/gpucost-*.tar.gz dist/checksums.txt --verify-tag \
+              --title "$GITHUB_REF_NAME" --notes-file "$notes"
+          fi
