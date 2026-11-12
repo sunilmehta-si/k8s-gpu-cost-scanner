@@ -267,47 +267,57 @@ func (c *Client) QueryRange(ctx context.Context, query string, start, end time.T
 }
 
 func (c *Client) do(ctx context.Context, path string, form url.Values) (*apiData, []string, error) {
+	var d apiData
+	warnings, err := c.doRaw(ctx, path, form, &d)
+	if err != nil {
+		return nil, warnings, err
+	}
+	return &d, warnings, nil
+}
+
+// doRaw posts the form and decodes the response's data field into out, retrying transient failures.
+func (c *Client) doRaw(ctx context.Context, path string, form url.Values, out any) ([]string, error) {
 	var lastErr error
 	wait := c.backoff
 	for attempt := 0; attempt <= c.retries; attempt++ {
 		if attempt > 0 {
 			select {
 			case <-ctx.Done():
-				return nil, nil, ctx.Err()
+				return nil, ctx.Err()
 			case <-time.After(wait):
 			}
 			wait *= 2
 		}
-		data, warnings, err := c.once(ctx, path, form)
+		warnings, err := c.once(ctx, path, form, out)
 		if err == nil {
-			return data, warnings, nil
+			return warnings, nil
 		}
 		lastErr = err
 		var apiErr *APIError
 		if errors.As(err, &apiErr) && !apiErr.Temporary() {
-			return nil, warnings, err
+			return warnings, err
 		}
 		if ctx.Err() != nil {
-			return nil, warnings, err
+			return warnings, err
 		}
 	}
-	return nil, nil, lastErr
+	return nil, lastErr
 }
 
-func (c *Client) once(ctx context.Context, path string, form url.Values) (*apiData, []string, error) {
+func (c *Client) once(ctx context.Context, path string, form url.Values, out any) ([]string, error) {
 	u := *c.base
 	u.Path = strings.TrimRight(u.Path, "/") + path
 	// POST keeps long queries out of URLs, request logs and proxies' length limits.
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), strings.NewReader(form.Encode()))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 	if c.token != nil {
 		tok, err := c.token()
 		if err != nil {
-			return nil, nil, fmt.Errorf("prometheus: %w", err)
+			return nil, fmt.Errorf("prometheus: %w", err)
 		}
 		req.Header.Set("Authorization", "Bearer "+tok)
 	}
@@ -318,12 +328,12 @@ func (c *Client) once(ctx context.Context, path string, form url.Values) (*apiDa
 	}
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return nil, nil, fmt.Errorf("prometheus: %w", scrubURLError(err))
+		return nil, fmt.Errorf("prometheus: %w", scrubURLError(err))
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 512<<20))
 	if err != nil {
-		return nil, nil, fmt.Errorf("prometheus: read response: %w", err)
+		return nil, fmt.Errorf("prometheus: read response: %w", err)
 	}
 	var r apiResponse
 	if err := json.Unmarshal(body, &r); err != nil {
@@ -331,16 +341,15 @@ func (c *Client) once(ctx context.Context, path string, form url.Values) (*apiDa
 		if len(msg) > 200 {
 			msg = msg[:200] + "…"
 		}
-		return nil, nil, &APIError{HTTPStatus: resp.StatusCode, Message: msg}
+		return nil, &APIError{HTTPStatus: resp.StatusCode, Message: msg}
 	}
 	if r.Status != "success" {
-		return nil, r.Warnings, &APIError{HTTPStatus: resp.StatusCode, Type: r.ErrorType, Message: r.Error}
+		return r.Warnings, &APIError{HTTPStatus: resp.StatusCode, Type: r.ErrorType, Message: r.Error}
 	}
-	var d apiData
-	if err := json.Unmarshal(r.Data, &d); err != nil {
-		return nil, r.Warnings, fmt.Errorf("prometheus: decode data: %w", err)
+	if err := json.Unmarshal(r.Data, out); err != nil {
+		return r.Warnings, fmt.Errorf("prometheus: decode data: %w", err)
 	}
-	return &d, r.Warnings, nil
+	return r.Warnings, nil
 }
 
 // Redact removes a password or token from a URL so it can be printed or stored.
@@ -397,4 +406,20 @@ func nonNil(l Labels) Labels {
 
 func sortSamples(s []Sample) {
 	sort.Slice(s, func(i, j int) bool { return s[i].Labels.Key() < s[j].Labels.Key() })
+}
+
+// LabelValues returns the values a label takes on series matching any of the matchers between start and end.
+// Asked for __name__, it lists which metrics exist over a window, which an instant query at one moment cannot.
+func (c *Client) LabelValues(ctx context.Context, label string, matchers []string, start, end time.Time) ([]string, []string, error) {
+	form := url.Values{"start": {formatTime(start)}, "end": {formatTime(end)}}
+	for _, m := range matchers {
+		form.Add("match[]", m)
+	}
+	var out []string
+	warnings, err := c.doRaw(ctx, "/api/v1/label/"+url.PathEscape(label)+"/values", form, &out)
+	if err != nil {
+		return nil, warnings, err
+	}
+	sort.Strings(out)
+	return out, warnings, nil
 }

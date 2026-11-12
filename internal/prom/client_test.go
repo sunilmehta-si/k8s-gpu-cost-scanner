@@ -203,3 +203,26 @@ func TestLabelsKeyIsSorted(t *testing.T) {
 		t.Errorf("Key = %s", got)
 	}
 }
+
+func TestLabelValues(t *testing.T) {
+	c := server(t, func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		if r.URL.Path != "/prom/api/v1/label/__name__/values" {
+			t.Errorf("path = %s", r.URL.Path)
+		}
+		if got := r.PostForm["match[]"]; len(got) != 2 || got[0] != `{__name__=~"DCGM_.*"}` {
+			t.Errorf("match[] = %v", got)
+		}
+		if r.PostForm.Get("start") == "" || r.PostForm.Get("end") == "" {
+			t.Error("start or end missing")
+		}
+		w.Write([]byte(`{"status":"success","data":["vllm:num_requests_running","DCGM_FI_DEV_GPU_UTIL"]}`))
+	})
+	got, _, err := c.LabelValues(context.Background(), "__name__", []string{`{__name__=~"DCGM_.*"}`, `{__name__=~"vllm:.*"}`}, time.Unix(0, 0), time.Unix(3600, 0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 2 || got[0] != "DCGM_FI_DEV_GPU_UTIL" {
+		t.Errorf("got %v", got)
+	}
+}
