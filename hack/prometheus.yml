@@ -1,0 +1,4 @@
+# Prometheus for the end-to-end test: it scrapes nothing. The synthetic fleet is backfilled into its TSDB.
+global:
+  scrape_interval: 1m
+scrape_configs: []

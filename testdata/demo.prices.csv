@@ -1,0 +1,4 @@
+# Illustrative prices for the synthetic demo fleet, not quotes. Use your own rates.
+gpu,price_per_gpu_hour,note
+h100-80gb,4.00,illustrative
+l4,0.70,illustrative

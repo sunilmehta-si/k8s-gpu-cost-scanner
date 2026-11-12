@@ -1,0 +1,376 @@
+{
+  "schema": "gpucost.report/v1",
+  "tool": "gpucost VERSION",
+  "source": "http://prometheus",
+  "window": {
+    "start": "2026-10-31T00:00:00Z",
+    "end": "2026-11-01T00:00:00Z",
+    "step": "5m0s"
+  },
+  "generated": "GENERATED",
+  "currency": "USD",
+  "thresholds": {
+    "idle_activity": 0.05,
+    "min_hours": 1,
+    "min_coverage": 0.5,
+    "low_duty": 0.25,
+    "kv_target": 0.8,
+    "oversized": 0.3,
+    "min_stranded_hours": 1,
+    "high_hours": 24,
+    "medium_hours": 4
+  },
+  "summary": {
+    "nodes": 3,
+    "pods": 9,
+    "offered_gpu_hours": 481.6666666666652,
+    "requested_gpu_hours": 421.5833333333321,
+    "measured_gpu_hours": 421.5833333333321,
+    "activity": 0.3715530539632338,
+    "cost": 1368.4333333333293,
+    "priced_share": 1,
+    "offered_cost": 1608.7666666666619,
+    "waste_gpu_hours": 221.41666666666598,
+    "waste_cost": 750.6416666666643,
+    "idle_gpu_hours": 20.99999999999994,
+    "findings": {
+      "high": 4,
+      "info": 1,
+      "low": 1,
+      "medium": 1
+    }
+  },
+  "models": [
+    {
+      "namespace": "ml",
+      "workload": "Deployment/llama-70b",
+      "model": "meta-llama/Llama-3.3-70B-Instruct",
+      "engine": "vllm",
+      "replicas": 3.0104166666666576,
+      "max_replicas": 3,
+      "gpu_hours": 288.99999999999915,
+      "cost": 1155.9999999999966,
+      "priced": true,
+      "activity": 0.47439267589388684,
+      "measured": true,
+      "busy_share": 1,
+      "generation_tokens": 36274338.325225845,
+      "prompt_tokens": 108823014.97567755,
+      "requests": 103640.96664350243,
+      "cost_per_million_tokens": 31.86825875735114,
+      "gpu_hours_per_million_tokens": 7.967064689337785,
+      "waste_gpu_hours": 96.33333333333304
+    },
+    {
+      "namespace": "ml",
+      "workload": "Deployment/legacy-mistral",
+      "model": "mistralai/Mistral-7B-Instruct-v0.3",
+      "engine": "vllm",
+      "replicas": 1.0034722222222192,
+      "max_replicas": 1,
+      "gpu_hours": 24.08333333333326,
+      "cost": 16.85833333333328,
+      "priced": true,
+      "activity": 0,
+      "measured": true,
+      "busy_share": 0,
+      "generation_tokens": 0,
+      "prompt_tokens": 0,
+      "requests": 0,
+      "cost_per_million_tokens": 0,
+      "gpu_hours_per_million_tokens": 0,
+      "waste_gpu_hours": 24.08333333333326
+    },
+    {
+      "namespace": "rl",
+      "workload": "Deployment/policy-server",
+      "model": "rl/policy-8b",
+      "engine": "vllm",
+      "replicas": 1.0034722222222192,
+      "max_replicas": 1,
+      "gpu_hours": 24.08333333333326,
+      "cost": 16.85833333333328,
+      "priced": true,
+      "activity": 0.15051903114186851,
+      "measured": true,
+      "busy_share": 0.30103806228373703,
+      "generation_tokens": 1944000,
+      "prompt_tokens": 5832000,
+      "requests": 3888,
+      "cost_per_million_tokens": 8.67198216735251,
+      "gpu_hours_per_million_tokens": 12.38854595336073,
+      "waste_gpu_hours": 16.833333333333282
+    },
+    {
+      "namespace": "ml",
+      "workload": "Deployment/qwen-7b",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "engine": "vllm",
+      "replicas": 1.0034722222222192,
+      "max_replicas": 1,
+      "gpu_hours": 24.08333333333326,
+      "cost": 16.85833333333328,
+      "priced": true,
+      "activity": 0.07681660899653983,
+      "measured": true,
+      "busy_share": 0.12802768166089964,
+      "generation_tokens": 236444.19735927726,
+      "prompt_tokens": 709332.5920778317,
+      "requests": 1074.7463516330783,
+      "cost_per_million_tokens": 71.29941661337124,
+      "gpu_hours_per_million_tokens": 101.85630944767321,
+      "waste_gpu_hours": 0
+    }
+  ],
+  "workloads": [
+    {
+      "namespace": "ml",
+      "kind": "Deployment",
+      "name": "llama-70b",
+      "pods": 3,
+      "gpu_hours": 288.99999999999915,
+      "cost": 1155.9999999999966,
+      "priced": true,
+      "activity": 0.47439267589388684,
+      "measured": true,
+      "waste_gpu_hours": 96.33333333333304
+    },
+    {
+      "namespace": "ml",
+      "kind": "Deployment",
+      "name": "legacy-mistral",
+      "pods": 1,
+      "gpu_hours": 24.08333333333326,
+      "cost": 16.85833333333328,
+      "priced": true,
+      "activity": 0,
+      "measured": true,
+      "waste_gpu_hours": 24.08333333333326
+    },
+    {
+      "namespace": "ml",
+      "kind": "Deployment",
+      "name": "qwen-7b",
+      "pods": 1,
+      "gpu_hours": 24.08333333333326,
+      "cost": 16.85833333333328,
+      "priced": true,
+      "activity": 0.07681660899653983,
+      "measured": true,
+      "waste_gpu_hours": 0
+    },
+    {
+      "namespace": "research",
+      "kind": "Pod",
+      "name": "notebook-ana",
+      "pods": 1,
+      "gpu_hours": 24.08333333333326,
+      "cost": 96.33333333333304,
+      "priced": true,
+      "activity": 0,
+      "measured": true,
+      "waste_gpu_hours": 24.08333333333326
+    },
+    {
+      "namespace": "rl",
+      "kind": "Deployment",
+      "name": "policy-server",
+      "pods": 1,
+      "gpu_hours": 24.08333333333326,
+      "cost": 16.85833333333328,
+      "priced": true,
+      "activity": 0.15051903114186851,
+      "measured": true,
+      "waste_gpu_hours": 16.833333333333282
+    },
+    {
+      "namespace": "search",
+      "kind": "Deployment",
+      "name": "embedder",
+      "pods": 1,
+      "gpu_hours": 24.08333333333326,
+      "cost": 16.85833333333328,
+      "priced": true,
+      "activity": 0.11979757785467128,
+      "measured": true,
+      "waste_gpu_hours": 0
+    },
+    {
+      "namespace": "training",
+      "kind": "Job",
+      "name": "finetune-llama",
+      "pods": 1,
+      "gpu_hours": 12.166666666666657,
+      "cost": 48.66666666666663,
+      "priced": true,
+      "activity": 0.9189835616438355,
+      "measured": true,
+      "waste_gpu_hours": 0
+    }
+  ],
+  "findings": [
+    {
+      "rule": "GPU005",
+      "slug": "excess-replicas",
+      "title": "More replicas than the peak load needed",
+      "severity": "high",
+      "target": "ml/Deployment/llama-70b",
+      "namespace": "ml",
+      "pods": [
+        "llama-70b-7c9d8f-axkqz",
+        "llama-70b-7c9d8f-bxkrz",
+        "llama-70b-7c9d8f-cxksz"
+      ],
+      "evidence": [
+        "ran up to 3 replicas of meta-llama/Llama-3.3-70B-Instruct",
+        "the KV cache in use across all replicas peaked at 105.0% of one replica's cache",
+        "at most 2 replicas were needed to keep each under 80.0% KV use, at the busiest step",
+        "no request waited in a queue at any replica"
+      ],
+      "waste_gpu_hours": 96.33333333333304,
+      "waste_cost": 385.3333333333322,
+      "priced": true,
+      "recommendation": "Cap the workload at 2 replicas, or let an autoscaler follow the load: scale on KV cache use or requests in the system, which track an LLM server's capacity, not on CPU. Keep a replica of headroom if the peak in this window was not the busiest you expect."
+    },
+    {
+      "rule": "GPU004",
+      "slug": "stranded-gpus",
+      "title": "GPUs no pod requested",
+      "severity": "high",
+      "target": "node/gpu-h100-b",
+      "node": "gpu-h100-b",
+      "evidence": [
+        "offered 192.7 GPU-hours (8 GPUs at most); pods requested 132.6 GPU-hours, 5.5 GPUs on average",
+        "31.2% of the node's GPU time (60.1 GPU-hours) no pod requested"
+      ],
+      "waste_gpu_hours": 60.083333333333115,
+      "waste_cost": 240.33333333333246,
+      "priced": true,
+      "recommendation": "Let the cluster autoscaler remove the node or shrink its node pool when GPUs sit unrequested, or pack GPU pods onto fewer nodes: KAI Scheduler bin-packs GPUs by default; Volcano needs its binpack plugin weighted for nvidia.com/gpu; the default scheduler needs MostAllocated scoring for it. If pods are pending at the same time, the free GPUs are split across nodes in pieces too small for them."
+    },
+    {
+      "rule": "GPU002",
+      "slug": "no-traffic",
+      "title": "Model served no traffic",
+      "severity": "high",
+      "target": "ml/Deployment/legacy-mistral",
+      "namespace": "ml",
+      "pods": [
+        "legacy-mistral-7c9d8f-axkqz"
+      ],
+      "node": "gpu-l4-a",
+      "evidence": [
+        "held 1 GPU for 24.1 hours of the window",
+        "vLLM (mistralai/Mistral-7B-Instruct-v0.3) finished 0 requests and generated 0 tokens in the window",
+        "GPU activity averaged 0.0%"
+      ],
+      "waste_gpu_hours": 24.08333333333326,
+      "waste_cost": 16.85833333333328,
+      "priced": true,
+      "recommendation": "Scale the model to zero while nothing calls it (KServe minReplicas: 0, a KEDA ScaledObject with minReplicaCount: 0, or Knative), or remove it if nothing should. Check first that clients are not failing to reach it: a broken route also shows as no traffic."
+    },
+    {
+      "rule": "GPU001",
+      "slug": "idle-gpu",
+      "title": "GPUs held but never used",
+      "severity": "high",
+      "target": "research/Pod/notebook-ana",
+      "namespace": "research",
+      "pods": [
+        "notebook-ana"
+      ],
+      "node": "gpu-h100-b",
+      "evidence": [
+        "held 1 GPU for 24.1 hours of the window",
+        "GPU activity: average 0.0%, 95th percentile 0.0%, peak 0.0% (DCGM, 100.0% of the time measured)",
+        "average power draw 60 W across its GPUs",
+        "GPU memory peaked at 2.0% of capacity: something was loaded, nothing ran on it"
+      ],
+      "waste_gpu_hours": 24.08333333333326,
+      "waste_cost": 96.33333333333304,
+      "priced": true,
+      "recommendation": "Find out why the pod holds GPUs it does not use (a finished job waiting to be cleaned up, a notebook left running, a GPU request on a container that needs none) and release them: delete the pod, set a TTL on finished Jobs, or cull idle notebooks."
+    },
+    {
+      "rule": "GPU003",
+      "slug": "engine-asleep",
+      "title": "Engine asleep while holding GPUs",
+      "severity": "medium",
+      "target": "rl/Deployment/policy-server",
+      "namespace": "rl",
+      "pods": [
+        "policy-server-7c9d8f-axkqz"
+      ],
+      "node": "gpu-l4-a",
+      "evidence": [
+        "held 1 GPU for 24.1 hours of the window",
+        "vLLM engine for rl/policy-8b was asleep 69.9% of that time (vllm:engine_sleep_state)",
+        "GPU activity averaged 0.0% while the engine slept"
+      ],
+      "waste_gpu_hours": 16.833333333333282,
+      "waste_cost": 11.783333333333298,
+      "priced": true,
+      "recommendation": "Sleep mode releases GPU memory, not the GPU. If the model sleeps this much, scale the pod to zero and back instead, or run the models that take turns sleeping in one pod so they share the GPU."
+    },
+    {
+      "rule": "GPU006",
+      "slug": "low-duty",
+      "title": "Serving pod busy for a small share of its time",
+      "severity": "low",
+      "target": "ml/Deployment/qwen-7b",
+      "namespace": "ml",
+      "pods": [
+        "qwen-7b-7c9d8f-axkqz"
+      ],
+      "node": "gpu-l4-a",
+      "evidence": [
+        "held 1 GPU for 24.1 hours of the window",
+        "vLLM (Qwen/Qwen2.5-7B-Instruct) had a request running in 12.8% of the steps, at most 2 at once",
+        "finished 1075 requests and generated 236444 tokens"
+      ],
+      "waste_gpu_hours": 0,
+      "waste_cost": 0,
+      "priced": false,
+      "idle_gpu_hours": 20.99999999999994,
+      "recommendation": "If the traffic comes in bursts, scale to zero between them (KServe, KEDA or Knative), weighing the model's cold start against the idle hours. Otherwise share the GPU: run several small models on one GPU, use MIG slices, or route this model's traffic to a pool that serves others."
+    },
+    {
+      "rule": "GPU007",
+      "slug": "oversized-gpu",
+      "title": "Work much smaller than the GPU",
+      "severity": "info",
+      "target": "search/Deployment/embedder",
+      "namespace": "search",
+      "pods": [
+        "embedder-7c9d8f-axkqz"
+      ],
+      "node": "gpu-l4-a",
+      "evidence": [
+        "GPU activity: average 12.0%, 95th percentile 12.5% over 24.1 hours"
+      ],
+      "waste_gpu_hours": 0,
+      "waste_cost": 0,
+      "priced": false,
+      "recommendation": "Try a MIG slice or a smaller GPU type for this workload, or share the GPU with another workload. Check the model's weights fit first: GPU memory use does not show it, because inference servers reserve most of the memory up front."
+    }
+  ],
+  "blind_spots": [],
+  "queries": {
+    "gpu_activity": "DCGM_FI_PROF_GR_ENGINE_UTIL_RATIO",
+    "gpu_memory_total_bytes": "max_over_time(DCGM_FI_DEV_FB_CAPACITY_BYTES[86400s])",
+    "gpu_memory_used_bytes": "DCGM_FI_DEV_FB_USED_BYTES",
+    "gpu_power_watts": "avg_over_time(DCGM_FI_DEV_BOARD_POWER_WATTS[86400s])",
+    "node_gpu_allocatable": "max by (node, resource) (kube_node_status_allocatable{resource=~\"nvidia_com_gpu|nvidia_com_mig_.+\"})",
+    "node_labels": "max by (node, label_nvidia_com_gpu_product, label_cloud_google_com_gke_accelerator, label_node_kubernetes_io_instance_type, label_karpenter_k8s_aws_instance_gpu_name) (last_over_time(kube_node_labels[86400s]))",
+    "pod_gpu_requests": "sum by (namespace, pod, node, resource) (max by (namespace, pod, container, node, resource) (kube_pod_container_resource_requests{resource=~\"nvidia_com_gpu|nvidia_com_mig_.+\"})) * on (namespace, pod) group_left () (max by (namespace, pod) (kube_pod_status_phase{phase=\"Running\"}) == 1)",
+    "pod_owner": "max by (namespace, pod, owner_kind, owner_name) (last_over_time(kube_pod_owner{owner_is_controller=\"true\"}[86400s]))",
+    "replicaset_owner": "max by (namespace, replicaset, owner_kind, owner_name) (last_over_time(kube_replicaset_owner[86400s]))",
+    "vllm_awake": "vllm:engine_sleep_state{sleep_state=\"awake\"}",
+    "vllm_generation_tokens": "increase(vllm:generation_tokens_total[86400s])",
+    "vllm_kv_usage": "vllm:kv_cache_usage_perc",
+    "vllm_prompt_tokens": "increase(vllm:prompt_tokens_total[86400s])",
+    "vllm_requests": "sum without (finished_reason) (increase(vllm:request_success_total[86400s]))",
+    "vllm_running": "vllm:num_requests_running",
+    "vllm_waiting": "vllm:num_requests_waiting"
+  }
+}
