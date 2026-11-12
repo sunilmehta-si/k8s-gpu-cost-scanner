@@ -253,7 +253,7 @@ func (a *analysis) claimPod(p *fleet.Pod, fd Finding, hours float64) {
 		hours = left
 	}
 	a.claimed[p.Key] += hours
-	fd.Target = p.Key.String()
+	fd.Target = p.Workload.String()
 	fd.Namespace = p.Key.Namespace
 	fd.Pods = []string{p.Key.Name}
 	fd.Node = p.Node

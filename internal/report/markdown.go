@@ -55,7 +55,7 @@ func Markdown(w io.Writer, r *analyze.Report) error {
 		for _, m := range r.Models {
 			b.printf("| `%s` | %s/%s | %.1f (max %d) | %s | %s | %s | %s | %s | %s |\n", cell(m.Model), cell(m.Namespace), cell(m.Workload),
 				m.Replicas, m.MaxReplicas, hours(m.GPUHours), costCell(m.Cost, m.Priced, r.Currency),
-				activityCell(m.Activity, m.Activity > 0), pct(m.BusyShare), count(m.GenerationTokens), perMillion(m, r.Currency))
+				activityCell(m.Activity, m.Measured), pct(m.BusyShare), count(m.GenerationTokens), perMillion(m, r.Currency))
 		}
 		b.printf("\n")
 	}

@@ -101,7 +101,7 @@ func Text(w io.Writer, r *analyze.Report, o TextOptions) error {
 		for _, m := range r.Models {
 			fmt.Fprintf(tw, "  %s\t%s/%s\t%.1f (max %d)\t%s\t%s\t%s\t%s\t%s\t%s\n",
 				truncate(m.Model, 40), m.Namespace, truncate(m.Workload, 36), m.Replicas, m.MaxReplicas, hours(m.GPUHours),
-				costCell(m.Cost, m.Priced, r.Currency), activityCell(m.Activity, m.Activity > 0), pct(m.BusyShare),
+				costCell(m.Cost, m.Priced, r.Currency), activityCell(m.Activity, m.Measured), pct(m.BusyShare),
 				count(m.GenerationTokens), perMillion(m, r.Currency))
 		}
 		tw.Flush()

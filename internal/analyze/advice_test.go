@@ -34,7 +34,7 @@ func TestOversized(t *testing.T) {
 	w.activity("ml", "fit-0", "GPU-2", constant(0.6))
 	r := w.run()
 	got := findings(r, "GPU007")
-	if len(got) != 1 || got[0].Target != "ml/small-0" || got[0].Severity != Info || got[0].WasteGPUHours != 0 {
+	if len(got) != 1 || got[0].Target != "ml/Pod/small-0" || got[0].Severity != Info || got[0].WasteGPUHours != 0 {
 		t.Fatalf("oversized = %+v", got)
 	}
 }

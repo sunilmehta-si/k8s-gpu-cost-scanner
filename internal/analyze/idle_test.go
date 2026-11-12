@@ -39,7 +39,7 @@ func TestIdleGPU(t *testing.T) {
 		t.Fatalf("idle findings = %+v", got)
 	}
 	f := got[0]
-	if f.Target != "research/notebook-0" || !near(f.WasteGPUHours, 22) || !near(f.WasteCost, 44) || !f.Priced {
+	if f.Target != "research/Pod/notebook-0" || !near(f.WasteGPUHours, 22) || !near(f.WasteCost, 44) || !f.Priced {
 		t.Errorf("finding = %+v", f)
 	}
 	if f.Severity != Medium {

@@ -36,6 +36,8 @@ type Usage struct {
 	PowerWatts float64 `json:"power_watts,omitempty"`
 	// GPUs is how many GPU series the exporter mapped to the pod.
 	GPUs int `json:"gpus"`
+	// Steps is the pod's activity at each step it held GPUs, keyed by Unix milliseconds.
+	Steps map[int64]float64 `json:"-"`
 }
 
 // podOf returns the pod a DCGM sample is attributed to. When Prometheus scrapes the exporter without
@@ -176,14 +178,16 @@ func (f *Fleet) attachDCGM(s *snapshot.Snapshot) {
 	for key, pod := range f.Pods {
 		steps := perPod[key]
 		var avgs []float64
-		for _, vs := range steps {
+		perStep := make(map[int64]float64, len(steps))
+		for t, vs := range steps {
 			sum := 0.0
 			for _, v := range vs {
 				sum += v
 			}
-			avgs = append(avgs, sum/float64(len(vs)))
+			perStep[t] = sum / float64(len(vs))
+			avgs = append(avgs, perStep[t])
 		}
-		u := Usage{Activity: Summarize(avgs)}
+		u := Usage{Activity: Summarize(avgs), Steps: perStep}
 		if held := len(pod.held); held > 0 {
 			u.Coverage = float64(len(steps)) / float64(held)
 		}

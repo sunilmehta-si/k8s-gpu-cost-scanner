@@ -18,7 +18,7 @@ func TestNoTraffic(t *testing.T) {
 	w.vllm("ml", "busy-0", "new-model", constant(3), nil, 9000, 120)
 	r := w.run()
 	got := findings(r, "GPU002")
-	if len(got) != 1 || got[0].Target != "ml/forgotten-0" || !near(got[0].WasteGPUHours, 11) {
+	if len(got) != 1 || got[0].Target != "ml/Deployment/forgotten" || !near(got[0].WasteGPUHours, 11) {
 		t.Fatalf("no-traffic = %+v", got)
 	}
 	// Claimed by the more specific rule, the same pod is not also called idle.

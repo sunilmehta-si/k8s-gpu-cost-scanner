@@ -142,15 +142,15 @@ func Demo() Scenario {
 		Expect: []Expectation{
 			// One replica of 4 GPUs too many, all day: 4 × 24 h.
 			{"GPU005", "ml/Deployment/llama-70b", 96, 0.5},
-			{"GPU002", "ml/legacy-mistral", 24, 0.5},
+			{"GPU002", "ml/Deployment/legacy-mistral", 24, 0.5},
 			// Asleep 70% of the day on one GPU.
-			{"GPU003", "rl/policy-server", 24 * 0.7, 0.5},
-			{"GPU001", "research/notebook-ana", 24, 0.5},
+			{"GPU003", "rl/Deployment/policy-server", 24 * 0.7, 0.5},
+			{"GPU001", "research/Pod/notebook-ana", 24, 0.5},
 			// gpu-h100-b: 8 GPUs × 24 h offered; 4 × 24 + 1 × 24 + 2 × 6 requested.
 			{"GPU004", "node/gpu-h100-b", 8*24 - (4*24 + 24 + 2*6), 0.5},
 			// qwen-7b runs a request in one step of eight: 7/8 of its 24 GPU-hours idle.
-			{"GPU006", "ml/qwen-7b", 24 * 7 / 8, 1},
-			{"GPU007", "search/embedder", 0, 0},
+			{"GPU006", "ml/Deployment/qwen-7b", 24 * 7 / 8, 1},
+			{"GPU007", "search/Deployment/embedder", 0, 0},
 		},
 	}
 }

@@ -56,8 +56,16 @@ func (a *analysis) asleep() {
 		if asleep < 0.1 {
 			continue
 		}
-		// Another engine in the same pod may use the GPU while this one sleeps; then the GPU is busy.
-		if u := p.Usage; u.Activity.Measured() && u.Activity.Avg >= 2*a.t.IdleActivity {
+		// Another engine in the same pod may use the GPU while this one sleeps; then the GPU is busy. Judge the
+		// GPU only on the steps this engine was asleep.
+		sleepingActivity, measured := 0.0, 0
+		for t, l := range e.Steps {
+			if v, ok := p.Usage.Steps[t]; ok && l.Asleep {
+				sleepingActivity += v
+				measured++
+			}
+		}
+		if measured > 0 && sleepingActivity/float64(measured) >= 2*a.t.IdleActivity {
 			continue
 		}
 		eq, _ := a.f.GPUEquivalents(p)
@@ -66,8 +74,8 @@ func (a *analysis) asleep() {
 			fmt.Sprintf("held %s for %.1f hours of the window", gpusText(p), p.RunningHours),
 			fmt.Sprintf("vLLM engine for %s was asleep %s of that time (vllm:engine_sleep_state)", modelText(e), pct(asleep)),
 		}
-		if u := p.Usage; u.Activity.Measured() {
-			ev = append(ev, fmt.Sprintf("GPU activity averaged %s", pct(u.Activity.Avg)))
+		if measured > 0 {
+			ev = append(ev, fmt.Sprintf("GPU activity averaged %s while the engine slept", pct(sleepingActivity/float64(measured))))
 		}
 		a.claimPod(p, Finding{
 			Rule: "GPU003", Slug: "engine-asleep", Title: "Engine asleep while holding GPUs",

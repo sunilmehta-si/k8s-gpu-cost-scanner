@@ -19,6 +19,8 @@ type Load struct {
 	// KV is the share of the KV cache in use; HasKV is false when the engine did not report it at that step.
 	KV    float64
 	HasKV bool
+	// Asleep is true when the engine reported being in sleep mode at that step.
+	Asleep bool
 }
 
 // Engine is what a pod's inference server reported about its own work.
@@ -186,6 +188,12 @@ func (f *Fleet) attachEngines(s *snapshot.Snapshot) {
 				if len(awV) > 0 {
 					share := ShareAbove(awV, 0.5)
 					e.AwakeShare = &share
+				}
+				for t, v := range aw {
+					if l, ok := e.Steps[t]; ok && v < 0.5 {
+						l.Asleep = true
+						e.Steps[t] = l
+					}
 				}
 			}
 			if haveCounts {

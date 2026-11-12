@@ -29,7 +29,7 @@ func (a *analysis) lowDuty() {
 		}
 		a.findings = append(a.findings, Finding{
 			Rule: "GPU006", Slug: "low-duty", Title: "Serving pod busy for a small share of its time",
-			Severity: sev, Target: p.Key.String(), Namespace: p.Key.Namespace, Pods: []string{p.Key.Name}, Node: p.Node,
+			Severity: sev, Target: p.Workload.String(), Namespace: p.Key.Namespace, Pods: []string{p.Key.Name}, Node: p.Node,
 			Evidence: ev, IdleGPUHours: idle,
 			Recommendation: "If the traffic comes in bursts, scale to zero between them (KServe, KEDA or Knative), " +
 				"weighing the model's cold start against the idle hours. Otherwise share the GPU: run several small " +
@@ -61,7 +61,7 @@ func (a *analysis) oversized() {
 		}
 		a.findings = append(a.findings, Finding{
 			Rule: "GPU007", Slug: "oversized-gpu", Title: "Work much smaller than the GPU",
-			Severity: Info, Target: p.Key.String(), Namespace: p.Key.Namespace, Pods: []string{p.Key.Name}, Node: p.Node,
+			Severity: Info, Target: p.Workload.String(), Namespace: p.Key.Namespace, Pods: []string{p.Key.Name}, Node: p.Node,
 			Evidence: ev,
 			Recommendation: "Try a MIG slice or a smaller GPU type for this workload, or share the GPU with another " +
 				"workload. Check the model's weights fit first: GPU memory use does not show it, because inference " +

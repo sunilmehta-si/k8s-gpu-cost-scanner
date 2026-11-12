@@ -21,6 +21,7 @@ type ModelCost struct {
 	// Activity is the GPUs' average activity, weighted by measured GPU-hours; BusyShare the share of time a
 	// request was running, weighted by GPU-hours.
 	Activity         float64 `json:"activity"`
+	Measured         bool    `json:"measured"`
 	BusyShare        float64 `json:"busy_share"`
 	GenerationTokens float64 `json:"generation_tokens"`
 	PromptTokens     float64 `json:"prompt_tokens"`
@@ -127,6 +128,7 @@ func (a *analysis) costs() ([]ModelCost, []WorkloadCost) {
 		}
 		if m.measured > 0 {
 			mc.Activity = m.active / m.measured
+			mc.Measured = true
 		}
 		if m.gpuHours > 0 {
 			mc.BusyShare = m.busyHours / m.gpuHours

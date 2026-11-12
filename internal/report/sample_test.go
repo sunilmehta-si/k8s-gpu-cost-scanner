@@ -31,7 +31,7 @@ func sampleReport() *analyze.Report {
 		},
 		Models: []analyze.ModelCost{{
 			Namespace: "ml", Workload: "Deployment/llama", Model: "meta-llama/Llama-3.1-8B-Instruct", Engine: "vllm",
-			Replicas: 2, MaxReplicas: 3, GPUHours: 48, Cost: 192, Priced: true, Activity: 0.41, BusyShare: 0.88,
+			Replicas: 2, MaxReplicas: 3, GPUHours: 48, Cost: 192, Priced: true, Activity: 0.41, Measured: true, BusyShare: 0.88,
 			GenerationTokens: 12_300_000, Requests: 41000, CostPerMillionTokens: 15.61, GPUHoursPerMillionTokens: 3.9,
 		}},
 		Workloads: []analyze.WorkloadCost{

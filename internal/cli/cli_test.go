@@ -56,7 +56,7 @@ func TestScanSnapshotTable(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit %d: %s", code, errOut)
 	}
-	for _, want := range []string{"GPU001 GPUs held but never used · lab/nb-0 · 5.0 GPU-hours · $3.50", "GPU004 GPUs no pod requested · node/g1"} {
+	for _, want := range []string{"GPU001 GPUs held but never used · lab/Pod/nb-0 · 5.0 GPU-hours · $3.50", "GPU004 GPUs no pod requested · node/g1"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("output lacks %q:\n%s", want, out)
 		}
