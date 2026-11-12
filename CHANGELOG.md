@@ -17,7 +17,8 @@ costs per hour and per million tokens, from the metrics the cluster already expo
   GPUs no pod requested, and the advice rules GPU006 low duty and GPU007 oversized GPU.
 - Sources: kube-state-metrics (requests, owners, allocatable GPUs, node labels), the DCGM exporter before and after
   4.9.0's renaming (activity, memory, power; pod labels as `exported_pod`, `pod` or `pod_name`), vLLM (including the
-  renamed KV cache gauge and sleep mode), SGLang, and OpenCost's GPU prices. MIG slices count as their share of a GPU.
+  renamed KV cache gauge and sleep mode), SGLang, and OpenCost's GPU prices. MIG slices count as their share of a GPU,
+  and so do time-sliced or MPS-shared replicas when GPU Feature Discovery's node labels are exported.
 - Prices from a CSV file or `--price` flags by GPU model in any spelling, family, instance type or default, then
   OpenCost; gpucost ships no price list and reports unpriced GPUs in GPU-hours.
 - `gpucost record` saves a window's raw metrics for offline analysis; `--redact` replaces names with pseudonyms for
