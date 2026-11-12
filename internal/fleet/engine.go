@@ -62,6 +62,22 @@ func enginePod(l prom.Labels) (PodKey, bool) {
 // (the engine label), whose requests add up; SGLang repeats the scheduler's numbers on every tensor-parallel
 // rank, so its series are not added. Duplicate scrapes of the same engine are collapsed either way.
 func combine(kind string, series []prom.Series, sum bool) map[int64]float64 {
+	// Most pods have one series: its points are the answer.
+	if len(series) == 1 {
+		out := make(map[int64]float64, len(series[0].Points))
+		for _, pt := range series[0].Points {
+			if !isNaN(pt.V) {
+				out[pt.T] = pt.V
+			}
+		}
+		return out
+	}
+	size := 0
+	for _, s := range series {
+		if len(s.Points) > size {
+			size = len(s.Points)
+		}
+	}
 	groups := map[string]map[int64]float64{}
 	for _, s := range series {
 		g := s.Labels["engine"]
@@ -70,7 +86,7 @@ func combine(kind string, series []prom.Series, sum bool) map[int64]float64 {
 		}
 		m := groups[g]
 		if m == nil {
-			m = map[int64]float64{}
+			m = make(map[int64]float64, size)
 			groups[g] = m
 		}
 		for _, pt := range s.Points {
@@ -82,7 +98,7 @@ func combine(kind string, series []prom.Series, sum bool) map[int64]float64 {
 			}
 		}
 	}
-	out := map[int64]float64{}
+	out := make(map[int64]float64, size)
 	count := map[int64]int{}
 	for _, m := range groups {
 		for t, v := range m {
@@ -147,7 +163,7 @@ func (f *Fleet) attachEngines(s *snapshot.Snapshot) {
 			if pod == nil {
 				continue
 			}
-			e := &Engine{Kind: set.kind, Steps: map[int64]Load{}}
+			e := &Engine{Kind: set.kind, Steps: make(map[int64]Load, len(pod.held))}
 			for _, series := range rs {
 				if m := series.Labels["model_name"]; m != "" {
 					e.Model = m

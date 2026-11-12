@@ -147,7 +147,7 @@ func (f *Fleet) attachDCGM(s *snapshot.Snapshot) {
 		}
 		steps := perPod[key]
 		if steps == nil {
-			steps = map[int64][]float64{}
+			steps = make(map[int64][]float64, len(pod.held))
 			perPod[key] = steps
 		}
 		for _, pt := range series.Points {
@@ -160,13 +160,21 @@ func (f *Fleet) attachDCGM(s *snapshot.Snapshot) {
 	// A GPU's own stats cover all of its series, whoever held it.
 	byGPU := map[string][]float64{}
 	for _, series := range activity {
+		id := gpuID(series.Labels)
+		if byGPU[id] == nil {
+			byGPU[id] = make([]float64, 0, len(series.Points))
+		}
 		for _, pt := range series.Points {
-			byGPU[gpuID(series.Labels)] = append(byGPU[gpuID(series.Labels)], pt.V)
+			byGPU[id] = append(byGPU[id], pt.V)
 		}
 	}
+	gpusOf := map[PodKey][]*GPU{}
 	for id, g := range gpus {
 		g.Activity = Summarize(byGPU[id])
 		f.GPUs = append(f.GPUs, g)
+		if g.Pod != nil {
+			gpusOf[*g.Pod] = append(gpusOf[*g.Pod], g)
+		}
 	}
 	sort.Slice(f.GPUs, func(i, j int) bool {
 		if f.GPUs[i].Node != f.GPUs[j].Node {
@@ -191,13 +199,11 @@ func (f *Fleet) attachDCGM(s *snapshot.Snapshot) {
 		if held := len(pod.held); held > 0 {
 			u.Coverage = float64(len(steps)) / float64(held)
 		}
-		for _, g := range f.GPUs {
-			if g.Pod != nil && *g.Pod == key {
-				u.GPUs++
-				u.PowerWatts += g.PowerWatts
-				if g.MemoryPeak > u.MemoryPeak {
-					u.MemoryPeak = g.MemoryPeak
-				}
+		for _, g := range gpusOf[key] {
+			u.GPUs++
+			u.PowerWatts += g.PowerWatts
+			if g.MemoryPeak > u.MemoryPeak {
+				u.MemoryPeak = g.MemoryPeak
 			}
 		}
 		pod.Usage = u
