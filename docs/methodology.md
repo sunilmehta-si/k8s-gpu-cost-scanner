@@ -114,9 +114,11 @@ collection (B005). A blind spot can only hide waste. gpucost never counts a GPU-
   finds GPUs doing nothing or little; it does not grade kernels.
 - **The window is what it sees.** A model idle all of this window may be busy at month's end. Scan the windows that
   matter, and use `--min-hours` and the thresholds to match your workloads.
-- **Time-sliced GPUs.** With time-slicing, several pods share one physical GPU and each requests one
-  `nvidia.com/gpu` replica. gpucost counts each request as a GPU-hour, which overstates GPU-hours and cost on
-  time-sliced nodes.
+- **Time-sliced and MPS-shared GPUs.** Several pods share one physical GPU, each requesting one `nvidia.com/gpu`
+  replica. When kube-state-metrics exports GPU Feature Discovery's `nvidia.com/gpu.sharing-strategy`,
+  `nvidia.com/gpu.count` and `nvidia.com/gpu.replicas` node labels, a replica counts as its share of a GPU (the
+  physical count over the allocatable replicas). Without those labels each replica counts as a whole GPU, which
+  overstates GPU-hours and cost on shared nodes.
 - **Dynamic Resource Allocation.** GPUs handed out through DRA ResourceClaims instead of `nvidia.com/gpu` requests
   are not counted yet: such pods request no `nvidia.com/gpu` and such nodes advertise none, so both are invisible
   to the request and allocatable signals, and a report on a DRA cluster understates its GPUs.

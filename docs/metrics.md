@@ -50,12 +50,12 @@ max by (namespace, replicaset, owner_kind, owner_name) (last_over_time(kube_repl
 
 ### `node_labels` (instant)
 
-Node labels kube-state-metrics is allowed to export, for the GPU product and instance type when the DCGM exporter does not name them.
+Node labels kube-state-metrics is allowed to export: the GPU product and instance type when the DCGM exporter does not name them, and GPU Feature Discovery's sharing labels, so a time-sliced GPU's replicas count as shares of one GPU.
 
 Needs `kube_node_labels`:
 
 ```promql
-max by (node, label_nvidia_com_gpu_product, label_cloud_google_com_gke_accelerator, label_node_kubernetes_io_instance_type, label_karpenter_k8s_aws_instance_gpu_name) (last_over_time(kube_node_labels[$WINDOW]))
+max by (node, label_nvidia_com_gpu_product, label_cloud_google_com_gke_accelerator, label_node_kubernetes_io_instance_type, label_karpenter_k8s_aws_instance_gpu_name, label_nvidia_com_gpu_count, label_nvidia_com_gpu_replicas, label_nvidia_com_gpu_sharing_strategy) (last_over_time(kube_node_labels[$WINDOW]))
 ```
 
 ## dcgm-exporter

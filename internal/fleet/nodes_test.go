@@ -43,6 +43,29 @@ func TestDescribeNodes(t *testing.T) {
 	}
 }
 
+func TestTimeSlicedSlotsCountAsShares(t *testing.T) {
+	s, ts := newSnap(t)
+	// Two physical GPUs time-sliced into 4 replicas each: 8 allocatable slots.
+	s.Range["node_gpu_allocatable"] = []prom.Series{{Labels: prom.Labels{"node": "shared", "resource": "nvidia_com_gpu"}, Points: points(ts, 8, 8, 8, 8, 8)}}
+	s.Range["pod_gpu_requests"] = []prom.Series{{Labels: prom.Labels{"namespace": "ml", "pod": "a", "node": "shared", "resource": "nvidia_com_gpu"}, Points: points(ts, 1, 1, 1, 1, 1)}}
+	s.Instant["node_labels"] = []prom.Sample{{Labels: prom.Labels{"node": "shared", "label_nvidia_com_gpu_sharing_strategy": "time-slicing", "label_nvidia_com_gpu_count": "2", "label_nvidia_com_gpu_replicas": "4"}}}
+	f := Build(s)
+	if n := f.Nodes["shared"]; n.SlotShare != 0.25 || !close(f.OfferedGPUHours(n), 2*1.25) {
+		t.Errorf("node = %+v, offered %v", n, f.OfferedGPUHours(n))
+	}
+	// One slot for 1.25 hours is a quarter of a GPU for 1.25 hours.
+	if eq, _ := f.GPUEquivalents(f.Pods[PodKey{"ml", "a"}]); !close(eq, 0.3125) {
+		t.Errorf("GPU equivalents = %v", eq)
+	}
+	// Without the count, the replicas label alone gives the share; without a strategy, nothing is shared.
+	if got := slotShare(map[string]string{"label_nvidia_com_gpu_sharing_strategy": "mps", "label_nvidia_com_gpu_replicas": "10"}, 0); got != 0.1 {
+		t.Errorf("mps with 10 replicas = %v", got)
+	}
+	if got := slotShare(map[string]string{"label_nvidia_com_gpu_replicas": "4"}, 8); got != 1 {
+		t.Errorf("no strategy = %v", got)
+	}
+}
+
 func TestOfferedGPUHours(t *testing.T) {
 	f := &Fleet{}
 	n := &Node{Product: "a100-80gb", OfferedHours: map[string]float64{"nvidia_com_gpu": 10, "nvidia_com_mig_1g_10gb": 7}}

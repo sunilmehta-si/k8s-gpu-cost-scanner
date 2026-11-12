@@ -82,6 +82,9 @@ type Node struct {
 	Product gpu.Product `json:"product"`
 	// InstanceType is the cloud instance type, when a node label or OpenCost named it.
 	InstanceType string `json:"instance_type,omitempty"`
+	// SlotShare is the share of a physical GPU one nvidia.com/gpu slot is: 1, or less on a node that time-slices
+	// or MPS-shares its GPUs and says so through GPU Feature Discovery's labels.
+	SlotShare float64 `json:"slot_share"`
 }
 
 // Fleet is everything the snapshot says about the cluster's GPUs.
