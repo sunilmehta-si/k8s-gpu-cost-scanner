@@ -1,0 +1,21 @@
+name: New finding, exporter or output
+description: Waste gpucost does not find yet, an exporter it does not read, or an output you need
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The waste or question
+      description: What should gpucost find or answer, and how would you spot it by hand today?
+    validations:
+      required: true
+  - type: textarea
+    id: metrics
+    attributes:
+      label: The metrics that show it
+      description: Which metrics (with an example series) would let gpucost find it without guessing?
+  - type: textarea
+    id: fix
+    attributes:
+      label: What you would do about it
+      description: The fix a finding should recommend.
