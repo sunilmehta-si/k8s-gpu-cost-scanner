@@ -26,6 +26,7 @@ golden:
 	$(GO) test ./internal/cli -run TestDemoGolden -update-golden
 docs:
 	$(GO) test ./internal/analyze -run TestFindingsDocIsCurrent -update-docs
+	$(GO) test ./internal/signals -run TestMetricsDocIsCurrent -update-docs
 
 # Release binaries for every platform, with checksums. Each build overwrites its own files in dist/.
 dist:
